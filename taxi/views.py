@@ -42,7 +42,7 @@ class ManufacturerListView(LoginRequiredMixin, generic.ListView):
         self, *, object_list=None, **kwargs
     ):
         context = super(ManufacturerListView, self).get_context_data(**kwargs)
-        name = self.request.GET.get("name")
+        name = self.request.GET.get("name", "")
         context["search_form"] = ManufacturerSearchForm(
             initial={"name": name},
         )
@@ -52,7 +52,8 @@ class ManufacturerListView(LoginRequiredMixin, generic.ListView):
         queryset = Manufacturer.objects.all()
         form = ManufacturerSearchForm(self.request.GET)
         if form.is_valid():
-            return queryset.filter(name__icontains=form.cleaned_data["name"])
+            return queryset.filter(
+                name__icontains=form.cleaned_data.get("name", ""))
         return queryset
 
 

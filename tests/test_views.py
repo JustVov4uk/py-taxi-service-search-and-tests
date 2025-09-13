@@ -19,7 +19,7 @@ class IndexViewTests(TestCase):
         response = self.client.get(reverse("taxi:index"))
         self.assertRedirects(
             response,
-            f"/accounts/login/?next={reverse("taxi:index")}",
+            f"/accounts/login/?next={reverse('taxi:index')}",
         )
 
     def test_index_view_logged_in_context_and_template(self):
@@ -63,7 +63,7 @@ class ManufacturerViewTests(TestCase):
         response = self.client.get(reverse("taxi:index"))
         self.assertRedirects(
             response,
-            f"/accounts/login/?next={reverse("taxi:index")}",
+            f"/accounts/login/?next={reverse('taxi:index')}",
         )
 
     def test_manufacturer_list_context_and_pagination(self):
@@ -143,7 +143,7 @@ class CarViewTests(TestCase):
         response = self.client.get(reverse("taxi:car-list"))
         self.assertRedirects(
             response,
-            f"/accounts/login/?next={reverse("taxi:car-list")}",
+            f"/accounts/login/?next={reverse('taxi:car-list')}",
         )
 
     def test_car_list_context_and_pagination(self):
@@ -215,7 +215,7 @@ class DriverViewTests(TestCase):
         response = self.client.get(reverse("taxi:driver-list"))
         self.assertRedirects(
             response,
-            f"/accounts/login/?next={reverse("taxi:driver-list")}",
+            f"/accounts/login/?next={reverse('taxi:driver-list')}",
         )
 
     def test_driver_list_context_and_pagination(self):
