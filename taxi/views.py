@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -52,8 +52,9 @@ class ManufacturerListView(LoginRequiredMixin, generic.ListView):
         queryset = Manufacturer.objects.all()
         form = ManufacturerSearchForm(self.request.GET)
         if form.is_valid():
-            return queryset.filter(
-                name__icontains=form.cleaned_data.get("name", ""))
+            name = form.cleaned_data.get("name")
+            if name:
+                queryset = queryset.filter(name__icontains=name)
         return queryset
 
 
@@ -82,9 +83,9 @@ class CarListView(LoginRequiredMixin, generic.ListView):
         self, *, object_list=None, **kwargs
     ):
         context = super(CarListView, self).get_context_data(**kwargs)
-        model = self.request.GET.get("model", "")
+        model_query = self.request.GET.get("model", "")
         context["search_form"] = CarSearchForm(
-            initial={"model": model}
+            initial={"model": model_query}
         )
         return context
 
@@ -92,7 +93,9 @@ class CarListView(LoginRequiredMixin, generic.ListView):
         queryset = Car.objects.select_related("manufacturer")
         form = CarSearchForm(self.request.GET)
         if form.is_valid():
-            return queryset.filter(model__icontains=form.cleaned_data["model"])
+            model_value = form.cleaned_data.get("model", "")
+            if model_value:
+                queryset = queryset.filter(model__icontains=model_value)
         return queryset
 
 
@@ -133,8 +136,9 @@ class DriverListView(LoginRequiredMixin, generic.ListView):
         queryset = Driver.objects.all()
         form = DriverSearchForm(self.request.GET)
         if form.is_valid():
-            return queryset.filter(
-                username__icontains=form.cleaned_data["username"])
+            username = form.cleaned_data.get("username")
+            if username:
+                queryset = queryset.filter(username__icontains=username)
         return queryset
 
 
@@ -162,11 +166,10 @@ class DriverDeleteView(LoginRequiredMixin, generic.DeleteView):
 
 @login_required
 def toggle_assign_to_car(request, pk):
-    driver = Driver.objects.get(id=request.user.id)
-    if (
-        Car.objects.get(id=pk) in driver.cars.all()
-    ):  # probably could check if car exists
-        driver.cars.remove(pk)
+    driver = request.user
+    car = get_object_or_404(Car, pk=pk)
+    if driver.cars.filter(pk=car.pk).exists():
+        driver.cars.remove(car)
     else:
-        driver.cars.add(pk)
+        driver.cars.add(car)
     return HttpResponseRedirect(reverse_lazy("taxi:car-detail", args=[pk]))
